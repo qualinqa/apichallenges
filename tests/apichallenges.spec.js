@@ -10,7 +10,7 @@ test.describe("API @challenge", () => {
     const response = await request.post(`${URL}challenger`);
     const headers = await response.headers();
     token = headers["x-challenger"];
-    console.log("Получили такой токен: " + token);
+    console.log("Получили такой токен: " + token); // Выводим полученный токен
     expect(headers).toEqual(expect.objectContaining({ "x-challenger": expect.any(String) }));
   });
 
@@ -374,7 +374,7 @@ test.describe("API @challenge", () => {
   // 29 - GET /todos (200) no Accept
   test("29 challenge: GET /todos no Accept (200)", async ({ request }) => {
     const response = await request.get(`${URL}todos`, {
-      headers: { "x-challenger": token },
+      headers: { "x-challenger": token }, // Не включаем заголовок Accept
     });
     const body = await response.json();
     expect(response.status()).toBe(200);
@@ -453,14 +453,17 @@ test.describe("API @challenge", () => {
 
   // 36 - PUT /challenger/{guid} CREATE (200)
   test("36 challenge: PUT /challenger/{guid} CREATE (200)", async ({ request }) => {
+    // Создаем новый GUID
     const newChallengerResponse = await request.post(`${URL}challenger`);
     const oldGuid = newChallengerResponse.headers()["x-challenger"];
-
+  
+    // Получаем прогресс для нового GUID
     const getResponse = await request.get(`${URL}challenger/${oldGuid}`, {
       headers: { "x-challenger": oldGuid },
     });
     const progressData = await getResponse.json();
-
+  
+    // Восстанавливаем прогресс с использованием текущего токена
     const response = await request.put(`${URL}challenger/${oldGuid}`, {
       headers: { "x-challenger": token, "Content-Type": "application/json" },
       data: progressData,
